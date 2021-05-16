@@ -1,6 +1,8 @@
 
 ### This project is only for practice, commercial use is prohibited, if there is any infringement, please contact me, I will remove the relevant content as soon as possible
 
+### Dieses Projekt ist nur zum Üben, die kommerzielle Nutzung ist untersagt, bei Verstößen kontaktieren Sie mich bitte, ich werde die entsprechenden Inhalte schnellstmöglich entfernen
+
 
 ## 免费，开源的 DeepL 翻译 APP（API 需自行注册）
 
