@@ -3,6 +3,7 @@
 
 ### Dieses Projekt ist nur zum Üben, die kommerzielle Nutzung ist untersagt, bei Verstößen kontaktieren Sie mich bitte, ich werde die entsprechenden Inhalte schnellstmöglich entfernen
 
+Offical Website: https://www.deepl.com/translator
 
 ## 免费，开源的第三方 DeepL 翻译 APP（API 需自行注册）
 
@@ -18,3 +19,8 @@ API 在这里[注册](https://www.deepl.com/pro#developer)
 - [ ] UI 设计
 
 <img src = "demo.gif" width="50%" height="50%"> <img src = "demo2.gif" width="50%" height="50%">
+
+
+## Acknowledgement：
+
+DeepL, DeepL API
