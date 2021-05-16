@@ -7,7 +7,7 @@
 
 没有 API 也没有关系，代码提供了爬虫的方式，但是注意不要太频繁，会被封 IP
 
--[] 搜索历史
+- [ ] 搜索历史
 
 
 <img src = "demo.gif" width="50%" height="50%"> <img src = "demo2.gif" width="50%" height="50%">
