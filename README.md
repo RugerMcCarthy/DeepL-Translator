@@ -18,7 +18,7 @@ API 在这里[注册](https://www.deepl.com/pro#developer)
 - [ ] 搜索历史
 - [ ] UI 设计
 
-<img src = "demo.gif" width="50%" height="50%"> <img src = "demo2.gif" width="50%" height="50%">
+<img src = "demo.gif" width="40%" height="40%"> <img src = "demo2.gif" width="50%" height="50%">
 
 
 ## Acknowledgement | Quittung | 鸣谢
