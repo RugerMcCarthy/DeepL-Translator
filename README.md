@@ -23,4 +23,4 @@ API 在这里[注册](https://www.deepl.com/pro#developer)
 
 ## Acknowledgement | Quittung | 鸣谢
 
-[DeepL](https://www.deepl.com/translator), [DeepL API](https://www.deepl.com/pro#developer)
+### [DeepL](https://www.deepl.com/translator), [DeepL API](https://www.deepl.com/pro#developer)
