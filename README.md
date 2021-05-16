@@ -4,7 +4,7 @@
 ### Dieses Projekt ist nur zum Üben, die kommerzielle Nutzung ist untersagt, bei Verstößen kontaktieren Sie mich bitte, ich werde die entsprechenden Inhalte schnellstmöglich entfernen
 
 
-## 免费，开源的 DeepL 翻译 APP（API 需自行注册）
+## 免费，开源的第三方 DeepL 翻译 APP（API 需自行注册）
 
 ### 本项目仅用于个人学习，禁止商业使用，若有侵权请联系本人，本人将尽快删除相关内容
 
