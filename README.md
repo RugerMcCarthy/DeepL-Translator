@@ -1,5 +1,5 @@
 
-### This project is only for personal learning, commercial use is prohibited, if there is any infringement, please contact me, I will remove the relevant content as soon as possible
+### This project is only for practice, commercial use is prohibited, if there is any infringement, please contact me, I will remove the relevant content as soon as possible
 
 
 ## 免费，开源的 DeepL 翻译 APP（API 需自行注册）
