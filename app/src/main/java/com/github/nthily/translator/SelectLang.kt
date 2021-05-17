@@ -29,7 +29,7 @@ fun SelectLang(
         when(viewModel.langMode){
             0 -> {
                 for(item in viewModel.allLangs.indices){
-                    if(viewModel.allLangs[item].first == viewModel.targetLanguage.first) continue
+                    if(viewModel.allLangs[item] == viewModel.targetLanguage) continue
                     item{
                         ListItem(viewModel.allLangs[item].first,viewModel.allLangs[item].second, viewModel, item, state)
                     }
@@ -37,7 +37,7 @@ fun SelectLang(
             }
             else -> {
                 for(item in 1 until viewModel.allLangs.size){
-                    if(viewModel.allLangs[item].first == viewModel.sourceLanguage.first) continue
+                    if(viewModel.allLangs[item] == viewModel.sourceLanguage) continue
                     item{
                         ListItem(viewModel.allLangs[item].first,viewModel.allLangs[item].second, viewModel, item, state)
                     }
