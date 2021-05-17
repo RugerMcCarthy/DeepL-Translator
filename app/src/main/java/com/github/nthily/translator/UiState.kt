@@ -1,8 +1,11 @@
 package com.github.nthily.translator
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -58,10 +61,15 @@ class UiState: ViewModel() {
 
     var langMode by mutableStateOf(0)
 
+    var temp by mutableStateOf("")
+
+    var focusState by mutableStateOf(FocusState.Disabled)
+
     private val client = OkHttpClient()
 
     // 爬虫方式
     fun getResult(){
+        Log.d(ContentValues.TAG, "nmsl")
         viewModelScope.launch(Dispatchers.IO){
 
             val body = "{\"jsonrpc\":\"2.0\",\"method\": \"LMT_handle_jobs\",\"params\":{\"jobs\":[{\"kind\":\"default\",\"raw_en_sentence\":\"$originWord\",\"raw_en_context_before\":[],\"raw_en_context_after\":[],\"preferred_num_beams\":4,\"quality\":\"fast\"}],\"lang\":{\"user_preferred_langs\":[\"PL\",\"RU\",\"FR\",\"SL\",\"DE\",\"JA\",\"HU\",\"IT\",\"EN\",\"ZH\",\"ES\"],\"source_lang_user_selected\":\"${sourceLanguage.second}\",\"target_lang\":\"${targetLanguage.second}\"},\"priority\":-1,\"commonJobParams\":{\"formality\":null},\"timestamp\":1621181157844},\"id\":54450008}"

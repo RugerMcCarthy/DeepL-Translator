@@ -28,12 +28,16 @@ fun SelectLang(
     LazyColumn(state = listState){
         when(viewModel.langMode){
             0 -> {
-                items(viewModel.allLangs.size){ item ->
-                    ListItem(viewModel.allLangs[item].first,viewModel.allLangs[item].second, viewModel, item, state)
+                for(item in viewModel.allLangs.indices){
+                    if(viewModel.allLangs[item].first == viewModel.targetLanguage.first) continue
+                    item{
+                        ListItem(viewModel.allLangs[item].first,viewModel.allLangs[item].second, viewModel, item, state)
+                    }
                 }
             }
             else -> {
                 for(item in 1 until viewModel.allLangs.size){
+                    if(viewModel.allLangs[item].first == viewModel.sourceLanguage.first) continue
                     item{
                         ListItem(viewModel.allLangs[item].first,viewModel.allLangs[item].second, viewModel, item, state)
                     }
