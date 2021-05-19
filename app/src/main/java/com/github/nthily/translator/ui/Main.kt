@@ -77,7 +77,7 @@ fun Input(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth(),
-                contentPadding = PaddingValues(10.dp)
+                contentPadding = PaddingValues(0.dp)
             ){
                 var historyLength = if (viewModel.searchHistorys.size > 10) viewModel.searchHistorys.size - 3 else 0
 
@@ -103,14 +103,7 @@ fun Input(
                     }
                     InputScaffold(viewModel, state, scaffoldState)
                 }
-                item{
-                    Text(
-                        text = "历史记录",
-                        fontWeight = FontWeight.W700,
-                        style = MaterialTheme.typography.h6,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
+                item{Spacer(Modifier.padding(vertical = 5.dp))}
                 for (i in viewModel.searchHistorys.size - 1 downTo historyLength) {
                     item{
                         HistoryListItems(viewModel, i, scaffoldState, scope)
@@ -152,7 +145,6 @@ fun InputScaffold(
     val focus = LocalFocusManager.current
 
     Surface(
-        shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 10.dp),
         color = Color.White,
         elevation = 5.dp
     ) {

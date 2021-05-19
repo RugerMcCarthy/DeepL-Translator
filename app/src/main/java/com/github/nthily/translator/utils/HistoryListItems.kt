@@ -30,9 +30,9 @@ fun HistoryListItems(
 ){
 
     Surface(
-
         color = Color.White,
-        elevation = 5.dp
+        elevation = 5.dp,
+        modifier = Modifier.padding(PaddingValues(10.dp))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
