@@ -1,6 +1,8 @@
 package com.github.nthily.translator
 
-import android.content.ContentValues.TAG
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -10,33 +12,32 @@ import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.nthily.translator.data.TranslateData
 import com.github.nthily.translator.ui.theme.TranslatorTheme
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -44,13 +45,37 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel:UiState by viewModels()
 
+
+    fun copyResultToClipboard(result: String) {
+        var clipboardManager: ClipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        var clipData = ClipData.newPlainText("translate", result)
+        clipboardManager.setPrimaryClip(clipData)
+    }
+
+    @ExperimentalFoundationApi
     @ExperimentalAnimationApi
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.requestCopy.observe(this) {
+            copyResultToClipboard(it)
+        }
+
         setContent {
+            val scaffoldState = rememberScaffoldState()
             TranslatorTheme {
-                Input(viewModel)
+                Scaffold(
+                    scaffoldState = scaffoldState,
+                    snackbarHost = {
+                        SnackbarHost(it) { data ->
+                            Snackbar(
+                                snackbarData = data
+                            )
+                        }
+                    }
+                ) {
+                    Input(viewModel, scaffoldState)
+                }
             }
         }
     }
@@ -59,11 +84,13 @@ class MainActivity : ComponentActivity() {
 
 
 
+@ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
 fun Input(
-    viewModel:UiState
+    viewModel:UiState,
+    scaffoldState: ScaffoldState
 ){
     val state = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
@@ -88,8 +115,8 @@ fun Input(
                 item{
                     AnimatedVisibility(visible = !viewModel.focusState.isFocused) {
                         Box(
-                        contentAlignment = Alignment.TopStart,
-                        modifier = Modifier.padding(bottom = 10.dp)
+                            contentAlignment = Alignment.TopStart,
+                            modifier = Modifier.padding(bottom = 10.dp)
                         ){
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
@@ -105,14 +132,14 @@ fun Input(
                             }
                         }
                     }
-                    InputScaffold(viewModel, state)
-                    ResultUI(viewModel)
+                    InputScaffold(viewModel, state, scaffoldState)
+                    // ResultUI(viewModel)
                 }
                 item{
                     Surface(
                         color = Color(80,94,224),
                         elevation = 5.dp,
-                        shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp),
+                        shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp, topStart = 10.dp, topEnd = 10.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 15.dp)
@@ -126,7 +153,56 @@ fun Input(
                                 fontWeight = FontWeight.W700,
                                 style = MaterialTheme.typography.h6,
                                 color = Color.White,
+                                modifier = Modifier.height(25.dp)
                             )
+                            Column(
+                                Modifier.fillMaxSize()
+                                    .padding(vertical = 15.dp)
+                            ) {
+                                var historyLength = if (viewModel.searchHistorys.size > 3) viewModel.searchHistorys.size - 3 else 0
+
+                                for (i in viewModel.searchHistorys.size - 1 downTo historyLength) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(Color(80,94,224))
+                                            .padding(top = if (i != viewModel.searchHistorys.size - 1) 22.5.dp else 0.dp)
+                                            .height(60.dp)
+                                            .combinedClickable(
+                                                onClick = {},
+                                                onLongClick = {
+                                                    viewModel.requestCopy.value = viewModel.searchHistorys[i].targetWord
+                                                    scope.launch {
+                                                        scaffoldState.snackbarHostState.showSnackbar("翻译结果已复制到剪贴板")
+                                                    }
+                                                })
+                                            .padding(start = 10.dp)
+                                    ) {
+                                        Row(Modifier.height(30.dp)) {
+                                            Text(
+                                                textAlign = TextAlign.Center,
+                                                text = viewModel.searchHistorys[i].sourceWord,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.W700,
+                                                fontSize = 18.sp,
+                                                modifier = Modifier
+                                                    .align(Alignment.CenterVertically)
+                                            )
+                                        }
+                                        Row(Modifier.height(30.dp)) {
+                                            Text(
+                                                textAlign = TextAlign.Center,
+                                                text = viewModel.searchHistorys[i].targetWord,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.W700,
+                                                fontSize = 18.sp,
+                                                modifier = Modifier
+                                                    .align(Alignment.CenterVertically)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -147,12 +223,14 @@ fun Input(
 }
 
 
+@ExperimentalFoundationApi
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
 fun InputScaffold(
     viewModel: UiState,
-    state: ModalBottomSheetState
+    state: ModalBottomSheetState,
+    scaffoldState: ScaffoldState
 ){
     var currentRotation by remember { mutableStateOf(0f) }
     val rotation = remember { Animatable(currentRotation) }
@@ -164,7 +242,7 @@ fun InputScaffold(
     val focus = LocalFocusManager.current
 
     Surface(
-        shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp),
+        shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 10.dp),
         color = Color.White,
         elevation = 5.dp
     ) {
@@ -184,7 +262,7 @@ fun InputScaffold(
                             scope.launch {
                                 state.show()
                             }
-                            viewModel.langMode = 0
+                            viewModel.langMode = SelectLanguageMode.SOURCE
                         }, contentAlignment = Alignment.CenterStart){
                         Text(
                             text = viewModel.sourceLanguage.first,
@@ -219,7 +297,7 @@ fun InputScaffold(
                             scope.launch {
                                 state.show()
                             }
-                            viewModel.langMode = 1
+                            viewModel.langMode = SelectLanguageMode.TARGET
                         }, contentAlignment = Alignment.CenterEnd){
                         Text(
                             text = viewModel.targetLanguage.first,
@@ -242,7 +320,7 @@ fun InputScaffold(
                     .fillMaxWidth()
                     .onFocusChanged {
                         viewModel.focusState = it
-                        if (!it.isFocused && viewModel.originWord != "") viewModel.getResultWithApi()
+                        // if (!it.isFocused && viewModel.originWord != "") viewModel.getResultWithApi()
                     },
                 placeholder = {
                     Text("点按即可输入文本")
@@ -255,10 +333,24 @@ fun InputScaffold(
                 ),
                 trailingIcon = {
                     if(viewModel.originWord != ""){
-                        IconButton(onClick = {
-                            viewModel.originWord = ""
-                        }) {
-                            Icon(Icons.Filled.Close,null, tint = Color(0xFF0079D3))
+                        Row {
+                            if (!viewModel.focusState.isFocused) {
+                                IconButton(onClick = {
+                                    viewModel.displayResult = ""
+                                    viewModel.result = ""
+                                    viewModel.temp = viewModel.originWord
+                                    viewModel.getResultWithApi()
+                                    focus.clearFocus()
+                                    viewModel.translating = true
+                                }) {
+                                    Icon(Icons.Filled.Send,null, tint = Color(0xFF0079D3))
+                                }
+                            }
+                            IconButton(onClick = {
+                                viewModel.originWord = ""
+                            }) {
+                                Icon(Icons.Filled.Close,null, tint = Color(0xFF0079D3))
+                            }
                         }
                     }
                 },
@@ -268,9 +360,60 @@ fun InputScaffold(
                 ),
                 maxLines = 2
             )
+            Divider(thickness = 0.8.dp)
+            if(!viewModel.focusState.isFocused && viewModel.originWord.isNotEmpty() && (viewModel.translating || viewModel.result.isNotEmpty())){
+                LaunchedEffect(key1 = viewModel.translating) {
+                    if (!viewModel.translating) {
+                        return@LaunchedEffect
+                    }
+                    while (true) {
+                        if (viewModel.result.isNotEmpty()) {
+                            viewModel.displayResult = viewModel.result
+                            viewModel.translating = false
+                            break;
+                        }
+                        if (viewModel.displayResult == ".....") {
+                            viewModel.displayResult = "."
+                        } else {
+                            viewModel.displayResult += "."
+                        }
+                        delay(300)
+                    }
+                }
+                val interactionSource = remember { MutableInteractionSource() }
+                Text(
+                    text = viewModel.displayResult.trim(),
+                    fontWeight = FontWeight.W700,
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .combinedClickable(
+                            onClick = {
+                                Log.d("gzz", "last")
+                            },
+                            onLongClick = {
+                                viewModel.requestCopy.value = viewModel.result
+                                scope.launch {
+                                    scaffoldState.snackbarHostState.showSnackbar("翻译结果已复制到剪贴板")
+                                }
+                            })
+//                        .longClickable(
+//                            interactionSource = interactionSource,
+//                            indication = rememberRipple(),
+//                            onLongClick = {
+//                                viewModel.copyResultToClipboard()
+//                                scope.launch {
+//                                    scaffoldState.snackbarHostState.showSnackbar("翻译结果已复制到剪贴板")
+//                                }
+//                            }
+//                        )
+                        .padding(15.dp)
+                        .animateContentSize()
+                )
+            }
             Divider(thickness = (0.8).dp)
 
-            if(viewModel.focusState.isFocused){
+            if(viewModel.focusState.isFocused && viewModel.originWord.isNotEmpty()){
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ){
@@ -285,9 +428,12 @@ fun InputScaffold(
                     )
                     if(viewModel.originWord != ""){
                         IconButton(onClick = {
+                            viewModel.displayResult = ""
+                            viewModel.result = ""
                             viewModel.temp = viewModel.originWord
                             viewModel.getResultWithApi()
                             focus.clearFocus()
+                            viewModel.translating = true
                         }) {
                             Icon(Icons.Filled.Send,null, tint = Color(0xFF0079D3))
                         }
@@ -348,6 +494,78 @@ fun ResultUI(
                             .padding(15.dp)
                             .animateContentSize()
                     )
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun HistoryPreview() {
+    Surface(
+        color = Color(80,94,224),
+        elevation = 5.dp,
+        shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp, topStart = 10.dp, topEnd = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 15.dp)
+            .height(300.dp)
+    ){
+        Column(
+            modifier = Modifier.padding(10.dp)
+        ) {
+            Text(
+                text = "搜索历史",
+                fontWeight = FontWeight.W700,
+                style = MaterialTheme.typography.h6,
+                color = Color.White,
+                modifier = Modifier.height(25.dp)
+            )
+            var searchHistorys = mutableListOf<TranslateData>(
+                TranslateData("hello", "你好"),
+                TranslateData("world", "世界"),
+                TranslateData("good", "好的"),
+                TranslateData("bye", "再见"),
+                TranslateData("morning", "早晨"),
+                TranslateData("evening", "晚上"),
+            )
+            Column(
+                Modifier.fillMaxSize()
+                    .padding(vertical = 15.dp)
+                    .clip(shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp, topStart = 10.dp, topEnd = 10.dp))
+            ) {
+                for (i in 1 .. if (searchHistorys.size >= 3) 3 else searchHistorys.size) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(80,94,224))
+                            .padding(top = if (i != 1) 22.5.dp else 0.dp)
+                            .height(60.dp)
+                    ) {
+                        Row(Modifier.height(30.dp)) {
+                            Text(
+                                textAlign = TextAlign.Center,
+                                text = searchHistorys[i].sourceWord,
+                                color = Color.White,
+                                fontWeight = FontWeight.W700,
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .align(Alignment.CenterVertically)
+                            )
+                        }
+                        Row(Modifier.height(30.dp)) {
+                            Text(
+                                textAlign = TextAlign.Center,
+                                text = searchHistorys[i].targetWord,
+                                color = Color.White,
+                                fontWeight = FontWeight.W700,
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .align(Alignment.CenterVertically)
+                            )
+                        }
+                    }
                 }
             }
         }

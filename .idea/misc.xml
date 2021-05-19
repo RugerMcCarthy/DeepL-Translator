@@ -3,7 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../../../layout/compose-model-1621426133264.xml" value="0.25" />
+        <entry key="../../../../../../layout/compose-model-1621435782365.xml" value="0.3175925925925926" />
         <entry key="..\:/Users/Anteayer/Desktop/translator/app/src/main/res/drawable/logo.xml" value="0.20729166666666668" />
+        <entry key="app/src/main/res/drawable/ic_deepl_logo_darkblue_v2.xml" value="0.19814814814814816" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.19814814814814816" />
       </map>
     </option>
   </component>

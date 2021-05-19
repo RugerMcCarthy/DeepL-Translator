@@ -1,13 +1,20 @@
 package com.github.nthily.translator
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ContentValues
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusState
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.nthily.translator.data.TranslateData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -19,6 +26,10 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
 
+sealed class SelectLanguageMode {
+    object SOURCE: SelectLanguageMode()
+    object TARGET: SelectLanguageMode()
+}
 
 class UiState: ViewModel() {
 
@@ -51,21 +62,30 @@ class UiState: ViewModel() {
         Pair("捷克语", "CS"),
         Pair("保加利亚语", "BG"),
     )
+    var translating by mutableStateOf(false)
 
     var sourceLanguage by mutableStateOf(allLangs[0])
 
     var targetLanguage by mutableStateOf(allLangs[19])
 
+    // obtain loading
+    var displayResult by mutableStateOf("")
+
     var result by mutableStateOf("")
+
     var requestRotate by mutableStateOf(false)
 
-    var langMode by mutableStateOf(0)
+    var langMode: SelectLanguageMode by mutableStateOf(SelectLanguageMode.SOURCE)
 
     var temp by mutableStateOf("")
 
     var focusState by mutableStateOf(FocusState.Disabled)
 
+    var searchHistorys = mutableStateListOf<TranslateData>()
+
     private val client = OkHttpClient()
+
+    var requestCopy = MutableLiveData<String>()
 
     // 爬虫方式
     fun getResult(){
@@ -94,6 +114,7 @@ class UiState: ViewModel() {
                         val resultArray = beams?.jsonArray
 
                         result = resultArray!!.get(0).jsonObject["postprocessed_sentence"].toString().replace("\"", "")
+                        searchHistorys.add(TranslateData(originWord, result))
                     } else result = "出现了错误"
                 }
             }catch(e: IOException){
