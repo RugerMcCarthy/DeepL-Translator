@@ -152,6 +152,7 @@ class UiState: ViewModel() {
                         }
 
                         result = text.toString().replace("\"", "")
+                        searchHistorys.add(TranslateData(originWord, result))
                     } else{
                         getResult()
                     }
